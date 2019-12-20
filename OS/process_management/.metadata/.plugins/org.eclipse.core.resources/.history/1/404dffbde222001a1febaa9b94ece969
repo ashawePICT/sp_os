@@ -1,0 +1,24 @@
+package shortestJobFirst;
+import java.util.Scanner;
+import java.util.Vector;
+
+import process_wireframe.SortByArrivalTime;
+import process_wireframe.Process;
+
+public class SJF {
+	public static void main(String[] args) {
+		Vector<Process> all_processes;
+		Scanner sc;
+		int total_number_of_processes;
+		
+		sc = new Scanner(System.in);		
+		
+		System.out.println("Enter total number of processes");
+		total_number_of_processes = sc.nextInt();
+		
+		for (int i = 0; i < total_number_of_processes; i++) {
+			
+		}
+		
+	}
+}

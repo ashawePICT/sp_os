@@ -1,0 +1,47 @@
+package process_wireframe;
+
+public class Process {
+	private final float burst_time;
+	private final float arrival_time;
+	private float remaining_execution_time;
+	
+	public float time_in_system;
+	public float turnaround_time;
+	
+	public Process( float burst_time ){
+		this.burst_time = burst_time;
+		this.arrival_time = 0;
+		this.remaining_execution_time = burst_time;
+		this.turnaround_time = 0;
+		this.time_in_system = 0;
+	}
+	
+	public Process( float burst_time, float arrival_time ){
+		this.burst_time = burst_time;
+		this.arrival_time = arrival_time;
+		this.remaining_execution_time = burst_time;
+		this.turnaround_time = 0;
+		this.time_in_system = 0;
+	}
+	
+	public void _wait( float waiting_time_period ){
+		this.time_in_system+=waiting_time_period;
+	}
+	
+	public void _execute( float clock_cycles ){
+		if( remaining_execution_time > 0 ){
+			remaining_execution_time-=clock_cycles;
+			this.time_in_system+=clock_cycles;
+		}
+	}
+	
+	public void complete_execution(){
+		this.time_in_system+=remaining_execution_time;
+		remaining_execution_time = 0;
+	}
+	
+	public void get_waiting_time(){
+		
+	}
+	
+}

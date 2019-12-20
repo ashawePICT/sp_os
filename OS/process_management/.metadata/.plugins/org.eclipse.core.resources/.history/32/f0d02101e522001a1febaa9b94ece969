@@ -1,0 +1,70 @@
+package shortestJobFirst;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Scanner;
+import java.util.Vector;
+
+import process_wireframe.SortByArrivalTime;
+import process_wireframe.Process;
+
+public class SJF {
+	static Scanner sc;
+	
+	public static void main(String[] args) {
+		sc = new Scanner(System.in);
+		Vector<Process> all_processes = new Vector<Process>();
+		
+		System.out.println("1. Preemptive\n 2. Non-Preemptive");
+		int choice = sc.nextInt();
+		if(choice == 1)
+			preemptive(all_processes);
+		else
+			non_preemptive(all_processes);
+	}
+
+	private static void non_preemptive(Vector<Process> process_list) {
+		int total_number_of_processes;
+		Vector<Process> all_processes = new Vector<Process>();
+		
+		
+		System.out.println("Enter total number of processes");
+		total_number_of_processes = sc.nextInt();
+		
+		for (int i = 0; i < total_number_of_processes; i++) {
+			System.out.println("Enter Burst time for P1");
+			float burstTime = sc.nextFloat();
+			Process p = new Process("p"+i,burstTime);
+			process_list.add(p);
+		}
+		
+		Collections.sort(process_list, new SortByArrivalTime());
+		
+		while(!process_list.isEmpty()){
+			Process p = process_list.firstElement();
+			p.complete_execution();
+			if(p.isComplete()){
+				all_processes.add(p);
+				process_list.remove(0);
+			}
+		}
+		
+		float totalWaitingTime = 0;
+		float totalTurnaroundTime = 0;
+		
+		while(!all_processes.isEmpty()){
+			Process p = all_processes.firstElement();
+			float waiting_time = p.get_waiting_time();
+			float turnaround = p.get_turnaround_time();
+			totalWaitingTime += waiting_time;
+			System.out.println("Waiting time for " + p.process_name + " is " + waiting_time);
+			System.out.println("Turnaround time for " + p.process_name + " is " + waiting_time);
+			System.out.println();
+		}
+		
+	}
+
+	private static void preemptive(Vector<Process> process_list) {
+		// TODO Auto-generated method stub
+		
+	}
+}
