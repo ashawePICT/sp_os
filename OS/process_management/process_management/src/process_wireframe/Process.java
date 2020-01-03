@@ -5,6 +5,7 @@ import java.util.Comparator;
 public class Process {
 	private final float burst_time;
 	private final float arrival_time;
+	private final int priority;
 	private float remaining_execution_time;
 	private boolean isComplete;
 	
@@ -17,6 +18,7 @@ public class Process {
 		this.arrival_time = 0;
 		this.remaining_execution_time = burst_time;
 		this.time_in_system = 0;
+		this.priority = 0;
 		isComplete = false;
 	}
 	
@@ -26,6 +28,17 @@ public class Process {
 		this.arrival_time = arrival_time;
 		this.remaining_execution_time = burst_time;
 		this.time_in_system = 0;
+		this.priority = 0;
+		isComplete = false;
+	}
+	
+	public Process( String name, float burst_time, float arrival_time, int priority ){
+		this.process_name = name;
+		this.burst_time = burst_time;
+		this.arrival_time = arrival_time;		
+		this.remaining_execution_time = burst_time;
+		this.time_in_system = 0;
+		this.priority = priority;
 		isComplete = false;
 	}
 	
@@ -39,6 +52,9 @@ public class Process {
 			if( remaining_execution_time >= clock_cycles ){
 				remaining_execution_time-=clock_cycles;
 				this.time_in_system+=clock_cycles;
+			}
+			else{
+				complete_execution();
 			}
 		}
 		if( remaining_execution_time == 0 )
@@ -73,6 +89,10 @@ public class Process {
 	
 	public float get_remaining_time(){
 		return remaining_execution_time;
+	}
+	
+	public float get_priority(){
+		return priority;
 	}
 	
 }
