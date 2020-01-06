@@ -9,6 +9,8 @@ public class MyDriver {
 		}
 		catch (IOException e) {
 			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 	}

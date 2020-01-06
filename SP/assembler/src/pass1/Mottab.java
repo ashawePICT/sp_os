@@ -1,8 +1,10 @@
 package pass1;
+import org.omg.CORBA.UserException;
+
 import pass1.Opcode;
 
 public class Mottab {
-	public Opcode getClass(String opcode) throws Exception
+	public static Opcode getClass(String opcode) throws Exception
 	{	
 		switch(opcode)
 		{
@@ -78,7 +80,7 @@ public class Mottab {
 			
 				
 			default:
-					throw new Exception("NAN");
+					throw new UserException("No opcode found"){}; 
 		}
 	}
 }
