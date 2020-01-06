@@ -1,6 +1,0 @@
-package shortestJobFirst;
-import process_wireframe.Process;
-
-public class SJF {
-
-}

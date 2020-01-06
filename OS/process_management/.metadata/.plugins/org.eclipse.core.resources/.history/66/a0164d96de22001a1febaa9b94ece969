@@ -1,6 +1,0 @@
-package shortest_job_first;
-import	process_wireframe.Process.java;
-
-public class SJF {
-
-}
