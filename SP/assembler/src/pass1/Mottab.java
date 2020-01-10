@@ -80,7 +80,7 @@ public class Mottab {
 			
 				
 			default:
-					throw new UserException("No opcode found"){}; 
+					throw new UserException("No opcode found for " + opcode){}; 
 		}
 	}
 }
