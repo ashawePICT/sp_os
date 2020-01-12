@@ -1,4 +1,3 @@
-package pass1;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -17,9 +16,10 @@ public class Pass1 {
 	private int symbolTableIndex = 0;
 	
 	public void doPassOne() throws Exception{
-		FileReader ip = new FileReader("/home/TE/Documents/SPOS_31332/SP/input.asm");
-		FileWriter op = new FileWriter("/home/TE/Documents/SPOS_31332/SP/output.obj");
-		FileWriter tb = new FileWriter("/home/TE/Documents/SPOS_31332/SP/tables.obj");
+		FileReader ip = new FileReader("input.asm");
+		FileWriter op = new FileWriter("is.txt");
+		FileWriter stb = new FileWriter("syntab.txt");
+		FileWriter ltb = new FileWriter("littab.txt");
 		
 		Vector<Map<String, Integer>> symbolTable = new Vector<>();
 		Vector<Map<String, Integer>> literalTable = new Vector<>();
@@ -56,10 +56,12 @@ public class Pass1 {
 				for(int i = lastLiteralTableSize; i < literalTable.size(); i++ ){
 					String key = literalTable.elementAt(i).entrySet().iterator().next().getKey();
 					literalTable.elementAt(i).replace(key,lc);
+					if( !words[1].equals("END"))
+						op.write("" + lc + " (DL,01) (C," + key.charAt(2) + ")" +"\n");
 					lc++;
 				}
 				lastLiteralTableSize = literalTable.size();
-				continue;
+				// continue;
 			}
 			
 			if( words[1].equals("ORIGIN")){
@@ -101,7 +103,6 @@ public class Pass1 {
 				if( words[1].equals("DS") )
 				{
 					lc += (Integer.valueOf(words[2])-1);
-					continue;
 				}
 				
 			}
@@ -122,7 +123,11 @@ public class Pass1 {
 						literalTableIndex++;
 					}
 					else{
-						if(!symbols.contains(variable2))
+						if(words[1].equals("DS"))
+						{
+							// do not add into any table
+						}
+						else if(!symbols.contains(variable2))
 						{
 							int x = variable2.indexOf('+');
 							// new symbol
@@ -179,39 +184,62 @@ public class Pass1 {
 					}
 				}
 			}
-			
+
+			if(opcode.get_OP_CLASS().equals("AD")){
+				continue;
+			}
+
 			if(length == 2)
 			{
-				System.out.println("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE()+")");
+				op.write("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE()+")"+"\n");
 			}
 			if(length == 3)
 			{
 				if( isVariable ){
-					if( isLiteral(variable2))
-						System.out.println("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + literalTableIndex);
-					else
-						System.out.println("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + symbolTableIndex);
+					op.write("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + "(C," + variable2 + ")"+"\n");
 				}
 				else
-					System.out.println("" + lc+ " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + " (" + operand1.get_OP_CLASS() + "," + operand1.get_CODE() + ") ");
+					op.write("" + lc+ " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + "(" + operand1.get_OP_CLASS() + "," + operand1.get_CODE() + ") "+"\n");
 			}
 			if(length == 4)
 			{
-				if( isVariable)
-					System.out.println("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + " (" + operand1.get_OP_CLASS() + "," + operand1.get_CODE() + ") " + " " + variable2);
+				if(isVariable)
+					{
+						int value1 = 0;
+						if(isLiteral(variable2))
+						{
+							value1 = literalTable.size();
+							if( operand1.get_OP_CLASS().equals("") )
+								op.write("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + "(" + operand1.get_CODE() + ") " + "(L," + value1 + ")"+"\n");
+							else
+								op.write("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + "(" + operand1.get_OP_CLASS() + "," + operand1.get_CODE() + ") " + "(L," + value1 + ")"+"\n");
+						}
+						else
+						{
+							value1 = symbols.indexOf(variable2)+1;
+							if( operand1.get_OP_CLASS().equals("") )
+								op.write("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + "(" + operand1.get_CODE() + ") " + "(S," + value1+")"+"\n");
+							else
+								op.write("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + "(" + operand1.get_OP_CLASS() + "," + operand1.get_CODE() + ") " + " " + "(S," + value1+")"+"\n");
+						}
+					}
 				else
-					System.out.println("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + " (" + operand1.get_OP_CLASS() + "," + operand1.get_CODE() + ") " + " (" + operand2.get_OP_CLASS() + "," + operand2.get_CODE() + ") ");
+					{
+						op.write("" + lc + " (" + opcode.get_OP_CLASS() + "," + opcode.get_CODE() + ") " + "(" + operand1.get_OP_CLASS() + "," + operand1.get_CODE() + ")" + " (" + operand2.get_OP_CLASS() + "," + operand2.get_CODE() + ") "+"\n");
+					}
 			}
 			
 			lc++;
 			
 		}
 		ip.close();
-		op.close();
+		//op.close();
 		
+		System.out.println();
+
 		for(Map<String,Integer> m : literalTable){
 			String key = m.entrySet().iterator().next().getKey();
-			System.out.println(key + ":" + m.get(key));
+			ltb.write(key + ":" + m.get(key)+"\n");
 		}
 		
 		System.out.println();
@@ -219,8 +247,12 @@ public class Pass1 {
 		
 		for(Map<String,Integer> m : symbolTable){
 			String key = m.entrySet().iterator().next().getKey();
-			System.out.println(key + ":" + m.get(key));
+			stb.write(key + ":" + m.get(key)+"\n");
 		}
+
+		op.close();
+		ltb.close();
+		stb.close();
 		
 	}
 	
