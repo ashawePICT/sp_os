@@ -3,7 +3,6 @@ package pass1;
 
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -13,16 +12,17 @@ public class Pass1 {
 	private static Scanner SC;
 	private int lc = -1;
 	private int lastLiteralTableSize = 0;
-	private int literalTableIndex = 0;
-	private int poolTableIndex = 0;
-	private int symbolTableIndex = 0;
+	private FileWriter op;
+	private FileWriter stb;
+	private FileWriter ltb;
+	private FileWriter ptb;
 	
 	public void doPassOne() throws Exception{
-		FileReader ip = new FileReader("/home/TE/Documents/SPOS_31332/SP/tp.asm");
-		FileWriter op = new FileWriter("/home/TE/Documents/SPOS_31332/SP/is.txt");
-		FileWriter stb = new FileWriter("/home/TE/Documents/SPOS_31332/SP/syntab.txt");
-		FileWriter ltb = new FileWriter("/home/TE/Documents/SPOS_31332/SP/littab.txt");
-		FileWriter ptb = new FileWriter("/home/TE/Documents/SPOS_31332/SP/pooltab.txt");
+		FileReader ip = new FileReader("/home/TE/Documents/SPOS_31332/SP/input.asm");
+		op = new FileWriter("/home/TE/Documents/SPOS_31332/SP/is.txt");
+		stb = new FileWriter("/home/TE/Documents/SPOS_31332/SP/syntab.txt");
+		ltb = new FileWriter("/home/TE/Documents/SPOS_31332/SP/littab.txt");
+		ptb = new FileWriter("/home/TE/Documents/SPOS_31332/SP/pooltab.txt");
 		
 		Vector<Map<String, Integer>> symbolTable = new Vector<>();
 		Vector<Map<String, Integer>> literalTable = new Vector<>();
@@ -41,7 +41,6 @@ public class Pass1 {
 			String[] words = line.split(" ");
 			int length = words.length;			
 			String label = "";
-			boolean isLabel = false;
 			boolean isVariable = false;
 			
 //			for( int i = 0; i < length; i++ )
@@ -85,15 +84,13 @@ public class Pass1 {
 			
 			if(!label.equals(""))
 			{
-				isLabel = true;
 				Map<String,Integer> test =  new HashMap<>();
 				// if new label is found add it to symbol table with current lc
 				if(!symbols.contains(label))
 				{
 					symbols.add(label);
 					test.put(label,lc);
-					symbolTable.add(test);
-					symbolTableIndex++;	
+					symbolTable.add(test);	
 				}
 				// if a forward reference is found
 				// find it and replace -1 with current lc
@@ -124,7 +121,6 @@ public class Pass1 {
 						Map<String,Integer> test =  new HashMap<>();
 						test.put(variable2,-1);
 						literalTable.add(test);
-						literalTableIndex++;
 					}
 					else{
 						if(words[1].equals("DS") || words[1].equals("DC"))
@@ -140,8 +136,7 @@ public class Pass1 {
 								Map<String,Integer> test =  new HashMap<>();
 								test.put(variable2,-1);
 								symbolTable.add(test);
-								symbols.add(variable2);
-								symbolTableIndex++;	
+								symbols.add(variable2);	
 							}
 							else
 							{
@@ -156,8 +151,7 @@ public class Pass1 {
 								Map<String,Integer> test =  new HashMap<>();
 								test.put(variable2,val+addingPointer);
 								symbolTable.add(test);
-								symbols.add(variable2);
-								symbolTableIndex++;	
+								symbols.add(variable2);	
 							}
 						}
 					}
@@ -175,7 +169,6 @@ public class Pass1 {
 						Map<String,Integer> test =  new HashMap<>();
 						test.put(variable2,-1);
 						literalTable.add(test);
-						literalTableIndex++;
 					}else{
 						if(!symbols.contains(variable2))
 						{
@@ -183,7 +176,6 @@ public class Pass1 {
 							test.put(variable2,-1);
 							symbolTable.add(test);
 							symbols.add(variable2);
-							symbolTableIndex++;
 						}
 					}
 				}
