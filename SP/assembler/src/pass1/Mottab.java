@@ -80,7 +80,12 @@ public class Mottab {
 			
 				
 			default:
-					throw new UserException("No opcode found for " + opcode){}; 
+					throw new UserException("No opcode found for " + opcode){
+
+						/**
+						 * 
+						 */
+						private static final long serialVersionUID = 1L;}; 
 		}
 	}
 }

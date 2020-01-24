@@ -1,5 +1,4 @@
 package pass1;
-import pass1.Mottab;
 public class Opcode {
 	
 	final String OPCODE;
