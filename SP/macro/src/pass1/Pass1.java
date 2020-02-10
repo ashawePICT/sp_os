@@ -36,6 +36,7 @@ public class Pass1 {
 			String line = SC.nextLine();
 			String[] words = line.split(" ");
 			
+			if(words.length > 1)
 			if( words[1].equals("MEND"))
 			{
 				mdt.getMdt().add("MEND");
@@ -48,45 +49,57 @@ public class Pass1 {
 				continue;
 			}
 			
-			if( words[1].equals("MACRO"))
+			if( words.length > 1 && words[1].equals("MACRO"))
 			{
 				line = SC.nextLine();
 				words = line.split(" ");
 				String name = words[1];
-				words = words[2].split(",");
-				flag = true;
-				
-				MNT_entry mnt_entry = new MNT_entry();
-				mnt_entry.setName(name);
-				mnt_entry.setKPDTPointer(KPDTAB.size());
-				mnt_entry.setMDTPointer( mdt.getMdt().size() );
-				
-				
-				
-				for(int i = 0; i < words.length; i++)
+				if( words.length < 3)
 				{
-					if(words[i].contains("="))
-					{
-						mnt_entry.setNoOfKeywordParams(mnt_entry.getNoOfKeywordParams() + 1);
-						int x = words[i].indexOf('=');
-						KPDTAB.add( new Kpdtab_entry(words[i].substring(1,x) , words[i].substring(x+1)));
-						params.add(words[i].substring(1,x));
-					}
-					else
-					{
-						mnt_entry.setNoOfPositionalParams(mnt_entry.getNoOfPositionalParams() + 1);
-						params.add(words[i].substring(1));
-					}
+					MNT_entry mnt_entry = new MNT_entry();
+					mnt_entry.setName(name);
+					mnt_entry.setKPDTPointer(KPDTAB.size());
+					mnt_entry.setMDTPointer( mdt.getMdt().size() );
+					flag = true;
+					MNT.add(mnt_entry);
+					continue;
 				}
-				MNT.add(mnt_entry);
-				continue;
+				else
+				{
+					words = words[2].split(",");
+					flag = true;
+					
+					MNT_entry mnt_entry = new MNT_entry();
+					mnt_entry.setName(name);
+					mnt_entry.setKPDTPointer(KPDTAB.size());
+					mnt_entry.setMDTPointer( mdt.getMdt().size() );
+					
+					
+					for(int i = 0; i < words.length; i++)
+					{
+						if(words[i].contains("="))
+						{
+							mnt_entry.setNoOfKeywordParams(mnt_entry.getNoOfKeywordParams() + 1);
+							int x = words[i].indexOf('=');
+							KPDTAB.add( new Kpdtab_entry(words[i].substring(1,x) , words[i].substring(x+1)));
+							params.add(words[i].substring(1,x));
+						}
+						else
+						{
+							mnt_entry.setNoOfPositionalParams(mnt_entry.getNoOfPositionalParams() + 1);
+							params.add(words[i].substring(1));
+						}
+					}
+					MNT.add(mnt_entry);
+					continue;	
+				}
 			}
 			
 			if(flag)
 			{
 				String s = new String();
-				
-				for( int i = 0; i < words.length; i++)
+				boolean test = false;
+				for( int i = 1; i < words.length; i++)
 				{
 					if( words[i].contains("&") )
 					{
@@ -96,7 +109,13 @@ public class Pass1 {
 					}
 					else
 					{
-						s += words[i];
+						if(!words[i].equals("") && test)
+							s = s + " " + words[i];
+						else
+						{
+							s+=words[i];
+							test = true;
+						}
 					}
 				}
 				mdt.getMdt().add(s);

@@ -13,7 +13,7 @@ public class MDT {
 		this.mdt = mdt;
 	}
 
-	MDT(){
+	public MDT(){
 		mdt = new Vector<>();
 	}
 }

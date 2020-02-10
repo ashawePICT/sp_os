@@ -1,6 +1,6 @@
-0 MOVER (P,2) (P,0)
-1 ADD (P,2) (P,1)
-2 MOVEM (P,2) (P,0)
+0 MOVER A,B
+1 ADD B,C
+2 MOVEM A,C
 3 MEND
 4 MOVER (P,3) (P,1)
 5 ADD (P,3) (P,0)
