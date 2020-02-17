@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.Character.Subset;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -95,7 +96,7 @@ public class Pass2 {
 				int numKP = mnt_entry.getNoOfKeywordParams();
 				int numPP = mnt_entry.getNoOfPositionalParams();
 				int kpPtr = mnt_entry.getKPDTPointer();
-				System.out.println("#PP:" + numPP + "#KP" + numKP);
+				// System.out.println("#PP:" + numPP + "#KP" + numKP);
 				int aptabSize =  numPP + numKP;
 				APTAB = new String[aptabSize];
 				
@@ -113,7 +114,7 @@ public class Pass2 {
 
 				for(int i = 1; i < words.length; i++)
 				{
-					if(words[i].contains("="))
+					if(words[i].contains("=")) // COPYING Keywords Parameters from Macro Call to APTAB
 					{
 						String[] value = words[i].split("=");
 						if(!value[1].equals(""))
@@ -129,21 +130,56 @@ public class Pass2 {
 								}
 							}
 							int q = ndex;
-							System.out.println("val: " + value[0] + "pp " + numPP + "q " + q + "kpte " + kpPtr);
+							// System.out.println("val: " + value[0] + "pp " + numPP + "q " + q + "kpte " + kpPtr);
 							APTAB[ numPP + q - kpPtr ] = value[1]; 
 						}
 					}
-					else
+					else // COPYING Positional Parameters from Macro Call to APTAB
 						APTAB[aptabPtr] = words[i];
 				}
 				
-				// COPYING Keywords Parameters from Macro Call to APTAB
-				for(String s : APTAB)
-					System.out.println(s);
+//				for(String s : APTAB)
+//					System.out.println(s);
 				
+				System.out.println("-- start of macro " + words[0] + " --");
+				int mdtEntry = mnt_entry.getMDTPointer();
+				for( int i = mdtEntry; ; i++ ){
+					String mdtLine = mdt.getMdt().elementAt(i);
+					// System.out.println(mdtLine);
+					
+					if(mdtLine.contains("MEND"))	// if MEND break
+						break;
+					
+					if(mdtLine.contains("("))		// Check if formal parameters need to be replaced by actual
+					{
+						String word[] = mdtLine.split(" ");
+						output.write(" " + word[1] + " ");
+						System.out.print(" " + word[1] + " ");
+						if( word[2].contains("(") )
+						{
+							String actualParameter = APTAB[Integer.parseInt("" + word[2].charAt(3))];
+							output.write(actualParameter + " ");
+							System.out.print(actualParameter + " ");
+						}
+						
+						if( word[3].contains("("))
+						{
+							String actualParameter = APTAB[Integer.parseInt(""+word[3].charAt(3))];
+							output.write(actualParameter + "\n");
+							System.out.print(actualParameter + "\n");
+						}
+					}
+					else
+					{
+						output.write(mdtLine.substring(1)+"\n");
+						System.out.print(mdtLine.substring(1)+"\n");
+					}
+				}
+				System.out.println("-- end of macro " + words[0] + " --");
 			}
 			else
 			{
+				System.out.println(code_line);
 				output.write(code_line+"\n");
 			}
 		}
