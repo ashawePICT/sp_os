@@ -89,93 +89,16 @@ public class Pass2 {
 			String code_line = SC.nextLine();
 			String[] words = code_line.split(" ");
 			int index = macro_names.indexOf(words[0]);
-			if( !words[0].equals("") && index != -1 )
+			if(!words[0].equals("") && index != -1)
 			{
-				// CREATING APTAB
 				MNT_entry mnt_entry = MNT.elementAt(index);
-				int numKP = mnt_entry.getNoOfKeywordParams();
-				int numPP = mnt_entry.getNoOfPositionalParams();
-				int kpPtr = mnt_entry.getKPDTPointer();
-				// System.out.println("#PP:" + numPP + "#KP" + numKP);
-				int aptabSize =  numPP + numKP;
-				APTAB = new String[aptabSize];
-				
-				// COPYING Default values of KPDTAB TO APTAB
-				for( int i = numPP; i < aptabSize; i++)
-				{
-					Kpdtab_entry kpdtab_entry = KPDTAB.elementAt(kpPtr); kpPtr++;
-					APTAB[i] = kpdtab_entry.getValue();
-				}				
-				
-				// COPYING Positional Parameters from Macro Call to APTAB
-				int aptabPtr = 0;
-				kpPtr = mnt_entry.getKPDTPointer();
-				
-
-				for(int i = 1; i < words.length; i++)
-				{
-					if(words[i].contains("=")) // COPYING Keywords Parameters from Macro Call to APTAB
-					{
-						String[] value = words[i].split("=");
-						if(!value[1].equals(""))
-						{
-							int ndex =0 ;
-							for(int j = kpPtr; j < kpPtr+numKP ; j++ )
-							{
-								Kpdtab_entry kpdtab_entry = KPDTAB.get(j);
-								if(kpdtab_entry.getName().equals(value[0]))
-								{
-									ndex = j;
-									break;
-								}
-							}
-							int q = ndex;
-							// System.out.println("val: " + value[0] + "pp " + numPP + "q " + q + "kpte " + kpPtr);
-							APTAB[ numPP + q - kpPtr ] = value[1]; 
-						}
-					}
-					else // COPYING Positional Parameters from Macro Call to APTAB
-						APTAB[aptabPtr] = words[i];
-				}
+				APTAB = createAPTAB(mnt_entry,words);
 				
 //				for(String s : APTAB)
 //					System.out.println(s);
 				
-				System.out.println("-- start of macro " + words[0] + " --");
-				int mdtEntry = mnt_entry.getMDTPointer();
-				for( int i = mdtEntry; ; i++ ){
-					String mdtLine = mdt.getMdt().elementAt(i);
-					// System.out.println(mdtLine);
-					
-					if(mdtLine.contains("MEND"))	// if MEND break
-						break;
-					
-					if(mdtLine.contains("("))		// Check if formal parameters need to be replaced by actual
-					{
-						String word[] = mdtLine.split(" ");
-						output.write(" " + word[1] + " ");
-						System.out.print(" " + word[1] + " ");
-						if( word[2].contains("(") )
-						{
-							String actualParameter = APTAB[Integer.parseInt("" + word[2].charAt(3))];
-							output.write(actualParameter + " ");
-							System.out.print(actualParameter + " ");
-						}
-						
-						if( word[3].contains("("))
-						{
-							String actualParameter = APTAB[Integer.parseInt(""+word[3].charAt(3))];
-							output.write(actualParameter + "\n");
-							System.out.print(actualParameter + "\n");
-						}
-					}
-					else
-					{
-						output.write(mdtLine.substring(1)+"\n");
-						System.out.print(mdtLine.substring(1)+"\n");
-					}
-				}
-				System.out.println("-- end of macro " + words[0] + " --");
+				processMacro(output,APTAB,words,mnt_entry,mdt,macro_names,MNT);
+				
 			}
 			else
 			{
@@ -189,4 +112,109 @@ public class Pass2 {
 		
 		output.close();
 	}
+	
+	String[] createAPTAB(MNT_entry mnt_entry, String[] words)
+	
+	{
+		// CREATING APTAB
+		int numKP = mnt_entry.getNoOfKeywordParams();
+		int numPP = mnt_entry.getNoOfPositionalParams();
+		int kpPtr = mnt_entry.getKPDTPointer();
+		// System.out.println("#PP:" + numPP + "#KP" + numKP);
+		int aptabSize =  numPP + numKP;
+		String[] APTAB = new String[aptabSize];
+		
+		// COPYING Default values of KPDTAB TO APTAB
+		for( int i = numPP; i < aptabSize; i++)
+		{
+			Kpdtab_entry kpdtab_entry = KPDTAB.elementAt(kpPtr); kpPtr++;
+			APTAB[i] = kpdtab_entry.getValue();
+		}				
+		
+		// COPYING Positional Parameters from Macro Call to APTAB
+		int aptabPtr = 0;
+		kpPtr = mnt_entry.getKPDTPointer();
+		
+
+		for(int i = 1; i < words.length; i++)
+		{
+			if(words[i].contains("=")) // COPYING Keywords Parameters from Macro Call to APTAB
+			{
+				String[] value = words[i].split("=");
+				if(!value[1].equals(""))
+				{
+					int ndex =0 ;
+					for(int j = kpPtr; j < kpPtr+numKP ; j++ )
+					{
+						Kpdtab_entry kpdtab_entry = KPDTAB.get(j);
+						if(kpdtab_entry.getName().equals(value[0]))
+						{
+							ndex = j;
+							break;
+						}
+					}
+					int q = ndex;
+					// System.out.println("val: " + value[0] + "pp " + numPP + "q " + q + "kpte " + kpPtr);
+					APTAB[ numPP + q - kpPtr ] = value[1]; 
+				}
+			}
+			else // COPYING Positional Parameters from Macro Call to APTAB
+				APTAB[aptabPtr] = words[i];
+		}
+		return APTAB;
+	}
+	
+	void processMacro(FileWriter output, String[] APTAB, String[] words, MNT_entry mnt_entry, MDT mdt, Vector<String> macro_names, Vector<MNT_entry> MNT) throws IOException
+	{
+		System.out.println("-- start of macro " + words[0] + " --");
+		int mdtEntry = mnt_entry.getMDTPointer();
+		for( int i = mdtEntry; ; i++ ){
+			String mdtLine = mdt.getMdt().elementAt(i);
+			// System.out.println(mdtLine);
+			
+			// check if nested macro call to another macro
+			String parts[] = mdtLine.split(" ");
+			int index = macro_names.indexOf(parts[1]);
+			if( index != -1 )
+			{
+				MNT_entry mnt_entry2 = MNT.elementAt(index);
+				String[] APTAB2 = createAPTAB(mnt_entry2, parts);
+				processMacro(output, APTAB2, words, mnt_entry2, mdt, macro_names, MNT);
+				continue;
+			}
+			
+			if(mdtLine.contains("MEND"))	// if MEND break
+				break;
+			
+			if(mdtLine.contains("("))		// Check if formal parameters need to be replaced by actual
+			{
+				String word[] = mdtLine.split(" ");
+				
+				output.write(" " + word[1] + " ");
+				
+				System.out.print(" " + word[1] + " ");
+				if( word[2].contains("(") )
+				{
+					int x = Integer.parseInt("" + word[2].charAt(3));
+					String actualParameter = APTAB[x];
+					output.write(actualParameter + " ");
+					System.out.print(actualParameter + " ");
+				}
+				
+				if( word[3].contains("("))
+				{
+					String actualParameter = APTAB[Integer.parseInt(""+word[3].charAt(3))];
+					output.write(actualParameter + "\n");
+					System.out.print(actualParameter + "\n");
+				}
+			}
+			else
+			{
+				output.write(mdtLine.substring(1)+"\n");
+				System.out.print(mdtLine.substring(1)+"\n");
+			}
+		}
+		System.out.println("-- end of macro " + words[0] + " --");
+	}
+	
 }
