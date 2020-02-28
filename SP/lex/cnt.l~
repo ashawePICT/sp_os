@@ -1,0 +1,49 @@
+
+/*lex code to count the number of lines, 
+    tabs and spaces used in the input*/
+  
+%{ 
+#include<stdio.h> 
+int lc=0, sc=0, tc=0, total=0, upper=0, lower=0, spl_char=0, no=0; /*Global variables*/
+%} 
+  
+/*Rule Section*/
+%% 
+\n lc++; //line counter 
+[ ] sc++; //space counter 
+\t tc++; //tab counter 
+[A-Z] upper++; //uppercase letters
+[a-z] lower++; //lowercase letters
+[0-9] no++;
+. spl_char++;
+end	{
+      
+    printf("\nNo. of lines=%d", lc);   
+    printf("\nNo. of spaces=%d", sc); 
+    printf("\nNo. of tabs=%d", tc); 
+    printf("\nNo. of specialcase characters=%d", spl_char); 
+    printf("\nNo. of uppercase letters=%d", upper); 
+    printf("\nNo. of lowercase letters=%d", lower); 
+    printf("\nNo. of digits=%d", no); 
+    total=spl_char+upper+lower;
+	printf("\nNo. of total characters=%d", total);
+	}     
+%% 
+  
+int yywrap() {
+}
+int main() 
+{ 
+    // The function that starts the analysis 
+    yylex(); 
+    return 0;
+      
+} 
+
+/*
+To run
+lex cnt.l
+ cc lex.yy.c
+ ./a.out
+*/
+
