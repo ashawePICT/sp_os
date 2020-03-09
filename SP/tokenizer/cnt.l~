@@ -1,0 +1,39 @@
+
+/*lex code to count the number of lines, 
+    tabs and spaces used in the input*/
+  
+%{ 
+	FILE* yyin;
+%} 
+
+DIGIT [0-9]
+NUMBER [DIGIT+]
+ACCESS_M "public"|"private"|"protected"|""|
+IMPORT "import"
+{PREDEFINED_CLASSES} "Scanner" | "String" | ""
+{TEXT} {a-zA-Z}
+{IDENTIFIER} {(TEXT)*}
+
+/*Rule Section*/
+%% 
+{DIGIT} {printf("%s - DIGIT",yytext);}
+{IMPORT} {printf("%s - import statement\n",yytext);}
+{PREDEFINED_CLASSES} {printf("%s - import statement\n",yytext);}
+{TEXT} {printf("%s - import statement\n",yytext);}
+{IDENTIFIER} {printf("%s - identifier\n",yytext);}
+
+%% 
+  
+int yywrap() {
+
+return 1;}
+int main(int argc, const char* argv[]) 
+{ 
+    // The function that starts the analysis 
+	yyin = fopen(argv[1],"r");
+    yylex(); 
+    fclose(yyin);
+    return 0;
+      
+} 
+
